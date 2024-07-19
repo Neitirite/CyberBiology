@@ -1,4 +1,5 @@
 using System.Diagnostics.Metrics;
+using System.Numerics;
 using System.Reflection;
 using System.Threading;
 using System.Timers;
@@ -8,99 +9,114 @@ namespace CyberBiology
 {
     public partial class Form1 : Form
     {
-        public int[] gen1 = new int[4];
-        public int[] gen2 = new int[4];
-        public int[] gen3 = new int[4];
-        public int[] gen4 = new int[4];
-        public int counter = 0;
-
-
-
+        List<string> Genomes = new List<string>();
         public Form1()
         {
             InitializeComponent();
-            pregen();
+            New_Genome();
         }
-        private void pregen()
+        private void New_Genome()
         {
+            string Genome = "";
             Random random = new Random();
-            gen1 = [random.Next(0, 5), random.Next(0, 5), random.Next(0, 5), random.Next(0, 5)];
-            gen2 = [random.Next(0, 5), random.Next(0, 5), random.Next(0, 5), random.Next(0, 5)];
-            gen3 = [random.Next(0, 5), random.Next(0, 5), random.Next(0, 5), random.Next(0, 5)];
-            gen4 = [random.Next(0, 5), random.Next(0, 5), random.Next(0, 5), random.Next(0, 5)];
-            listView1.Items.Add("0");
-            updateLabels();
-            
-
-            
-            
-        }
-        private void updateLabels()
-        {
-            label1.Text = gen1[0].ToString();
-            label2.Text = gen1[1].ToString();
-            label3.Text = gen1[2].ToString();
-            label4.Text = gen1[3].ToString();
-            label5.Text = gen2[0].ToString();
-            label6.Text = gen2[1].ToString();
-            label7.Text = gen2[2].ToString();
-            label8.Text = gen2[3].ToString();
-            label9.Text = gen3[0].ToString();
-            label10.Text = gen3[1].ToString();
-            label11.Text = gen3[2].ToString();
-            label12.Text = gen3[3].ToString();
-            label13.Text = gen4[0].ToString();
-            label14.Text = gen4[1].ToString();
-            label15.Text = gen4[2].ToString();
-            label16.Text = gen4[3].ToString();
-        }
-        public void run(object sender, EventArgs e)
-        {
-
-            
-            Random random = new Random();
-            if (random.Next(0, 2) == 1)
+            for (int i = 0; i < 6; i++)
             {
-                switch (random.Next(0, 4))
+                int val = -1; //просто временная переменная
+                if (i < 5) // команды генома
                 {
-                    case 0:
-                        gen1[random.Next(0, 4)] = random.Next(0, 5);
-                        break;
-
-                    case 1:
-                        gen2[random.Next(0, 4)] = random.Next(0, 5);
-                        break;
-
-                    case 2:
-                        gen3[random.Next(0, 4)] = random.Next(0, 5);
-                        break;
-
-                    case 3:
-                        gen4[random.Next(0, 4)] = random.Next(0, 5);
-                        break;
-
+                    val = random.Next(0, 99);
                 }
-                counter++;
-                listView1.Items.Add(counter.ToString());
+
+                if (val < 10 && val >= 0 && i < 5) //добавление разделителей для удобства сплита, после значения энергии разделитель не нужен, поэтому там запись отдельно
+                {
+                    Genome += '0' + val.ToString() + '|';
+                }
+                else if(val >= 0)
+                {
+                    Genome += val.ToString() + '|';
+                }
+
+                if (i == 3) //добавляем or для удобства восприятия
+                {
+                    Genome += "or|";
+                }
+
+                if (i == 5) //энергия
+                {
+                    val = random.Next(10, 75);
+                    Genome += val.ToString();
+                }
             }
-            updateLabels();
-            
-                
-            
+            Genomes.Add(Genome);
+            UpdateList();
+            Display_Genome(Genomes.Count - 1);
+
+
+
+
         }
-        private void tick()
+        private void UpdateList()
+        {
+            listView1.Items.Clear();
+            for(int i = 0; i < Genomes.Count; i++)
+            {
+                listView1.Items.Add(i.ToString());
+            }
+
+        }
+
+        private void Display_Genome(int id)
+        {
+            string Genome = Genomes[id];
+            string[] spl = Genome.Split("|"); //разбиваем геном из монолита на отдельные элементы и выводим в соответствующие поля
+            label1.Text = spl[0];
+            label2.Text = spl[1];
+            label3.Text = spl[2];
+            label4.Text = spl[3];
+            label5.Text = spl[4];
+            label6.Text = spl[5];
+            label7.Text = "E_min: " + spl[6];
+
+            label8.Text = "Raw: " + Genome; //выводим монолит, чтобы да
+
+            groupBox2.Text = id.ToString(); //переименовываем заголовок в соответствующий номер генома
+        }
+
+        private void Tick(object sender, EventArgs e)
+        {
+
+
+
+        }
+        private void Run()
         {
             System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-            timer.Tick += new EventHandler(run);
+            timer.Tick += new EventHandler(Tick);
             timer.Interval = 100;
             timer.Start();
-            
+
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            //button1.Visible = false;
-            tick();
+            New_Genome();
+        }
+        private void Mutate()
+        {
+
+        }
+        private void Save_Genom()
+        {
+
         }
 
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Display_Genome(Int32.Parse(listView1.SelectedItems[0].Text));
+            }
+            catch { }
+            
+        }
     }
 }
